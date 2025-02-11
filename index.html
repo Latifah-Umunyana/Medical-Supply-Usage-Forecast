@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Medical Supply Usage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <style>
+        body {
+            background-color: #f0f8ff;
+        }
+    </style>
+</head>
+<body style="background-image: url('medical-supply.jpg');">
+    
+    <h1 class="text-3xl text-center font-bold text-white mb-2 pt-4 italic">Medical Supply Usage</h1>
+    <div class="flex flex-col md:flex-row justify-center py-4">
+        <div class="w-full md:w-5/12 p-6 rounded-lg shadow-md relative" style="background-color: rgba(225, 255, 254, 0.3);">
+            <div class="space-y-6 px-6 items-center">
+                <label class="text-2xl font-bold text-white">Daily Usage Data:</label>
+                <input type="text" id="usageInput" placeholder="Enter values separated by commas" 
+                    class="w-full p-3 rounded-lg shadow-md focus:outline-none">
+                <button id="calculateBtn" class="px-12 mx-auto bg-[#172B69] text-white py-3 rounded-lg hover:bg-blue-900 font-bold">
+                    Calculate WMA
+                </button>
+                <div id="forecastResult" class="w-full p-4 text-lg font-bold text-[#172B69] rounded-lg text-center shadow-md bg-[#F5FAFB]">
+                    <p>Data driven forecast here</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w-full md:w-4/12 flex justify-center items-center pl-0 md:pl-10">
+            <canvas id="scatterChart" width="400" height="400"></canvas>
+        </div>
+    </div> 
+    <p class="text-lg text-center text-white font-semibold pt-4">
+        Predict your future supply usage, and know how much to order!
+    </p>
+
+    <script>
+        function forecastUsageWma(usage_list) {
+            if (usage_list.length < 3 || usage_list.length > 7) {
+                alert("Please input daily usage data from 3 to 7 days");
+                return null;
+            }
+
+            const dataTypeCheck = usage_list.every(usage => typeof (usage) === 'number');
+            if (!dataTypeCheck) {
+                alert("Please input daily usage as numbers");
+                return null;
+            }
+
+            const weights = usage_list.map((_, index) => index + 1);
+            const { usageWeights, totalWeights } = usage_list.reduce((accumulator, currentValue, index) => {
+                accumulator.usageWeights += currentValue * weights[index];
+                accumulator.totalWeights += weights[index];
+                return accumulator;
+            }, { usageWeights: 0, totalWeights: 0 });
+
+            const wma = usageWeights / totalWeights;
+            return wma.toFixed(2);
+        }
+
+        const ctx = document.getElementById('scatterChart').getContext('2d');
+        const scatterChart = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Daily Usage - PPE',
+                    data: [],
+                    backgroundColor: 'black',
+                    borderColor: 'white',
+                    borderWidth: 2,
+                    showLine: true,
+                    fill: false,
+                    pointStyle: 'circle',
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Daily Usage - PPE',
+                        color: 'white',
+                        font: { size: 30, weight: 'bold' }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'Weights',
+                            color: 'white',
+                            font: { weight: 'bold', size: 16 }
+                        },
+                        ticks: {
+                            color: 'white',
+                            font: { weight: 'bold', size: 14 }
+                        },
+                        grid: {
+                            drawBorder: true,
+                            borderColor: 'orange',
+                            borderWidth: 3,
+                            display: false
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Daily Usage',
+                            color: 'white',
+                            font: { weight: 'bold', size: 16 }
+                        },
+                        ticks: {
+                            color: 'white',
+                            font: { weight: 'bold', size: 14 }
+                        },
+                        grid: {
+                            drawBorder: true,
+                            borderColor: 'orange',
+                            borderWidth: 3,
+                            display: false
+                        }
+                    }
+                },
+                layout: {
+                    padding: 10
+                }
+            }
+        });
+
+        document.getElementById('calculateBtn').addEventListener('click', () => {
+            const usageInput = document.getElementById('usageInput').value;
+            const usageData = usageInput.split(',')
+                .map(value => parseFloat(value.trim()))
+                .filter(value => !isNaN(value));
+
+            if (usageData.length >= 3) {
+                const wma = forecastUsageWma(usageData);
+                if (wma !== null) {
+                    document.getElementById('forecastResult').textContent = `Forecast result: ${wma}`;
+                    scatterChart.data.datasets[0].data = usageData.map((value, index) => ({ x: index + 1, y: value }));
+                    scatterChart.update();
+                }
+            } else {
+                alert('Please input at least 3 days of usage data');
+            }
+        });
+    </script>
+</body>
+</html>
