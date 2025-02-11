@@ -12,7 +12,7 @@ I also validated that all values in the array were numbers to prevent errors, pr
 
 The SMA was calculated by dividing the sum of the elements by the length of the array. For clarity, I rounded the result to two decimal places before returning the forecast.
 
-The WMA was calculated by multiplying each element by its corresponding weight, summing the weighted values, and then dividing by the sum of the weights. To enhance readability, I rounded the result to two decimal places before returning the forecast.
+The WMA was calculated by multiplying each element by its corresponding weight, summing the weighted values, and then dividing by the sum of the weights. To enhance readability, I rounded the result to two decimal places before returning the forecast. (It is recommended to use 3-7 days as a window, because more data may not be as relevant to forecasting the next day.
 
 ## Key takeaway:
 
