@@ -26,8 +26,8 @@ function forecastUsageSma(usage_list) {
 // Function to calculate the Weighted Moving Average
 
 function forecastUsageWma(usage_list) {
-    if ( usage_list.length < 3 || usage_list.length > 7 ) {
-        console.log("Please input daily usage data from 3 to 7 days");
+    if ( usage_list.length < 3) {
+        console.log("Please input daily usage data not less than 3");
         return;
     }
 
